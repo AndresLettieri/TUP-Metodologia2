@@ -53,48 +53,28 @@ public class Consola {
         }
     }
 
-    public TipoSolicitud seleccionarTipoSolicitud() {
-        TipoSolicitud[] tipos = TipoSolicitud.values();
+    private <T extends Enum<T>> T seleccionarOpcion(String titulo, T[] opciones) {
+        mostrarOpciones(titulo, opciones);
+        while (true) {
+            int opcion = leerEntero("Seleccione: ");
+            if (opcion >= 1 && opcion <= opciones.length)
+                return opciones[opcion - 1];
 
-        mostrarOpciones("Tipo de solicitud:", tipos);
-
-        int opcion = leerEntero("Seleccione: ");
-
-        if (opcion < 1 || opcion > tipos.length) {
-            throw new RuntimeException("Tipo de solicitud inválido.");
+            System.out.println("Opción inválida. Ingrese un número entre 1 y "+ opciones.length + ".");
         }
+    }
 
-        return tipos[opcion - 1];
+    public TipoSolicitud seleccionarTipoSolicitud() {
+        return seleccionarOpcion("Tipo de solicitud:", TipoSolicitud.values());
     }
 
     public Prioridad seleccionarPrioridad() {
-        Prioridad[] prioridades = Prioridad.values();
-
-        mostrarOpciones("Prioridad:", prioridades);
-
-        int opcion = leerEntero("Seleccione: ");
-
-        if (opcion < 1 || opcion > prioridades.length) {
-            throw new RuntimeException("Prioridad inválida.");
-        }
-
-        return prioridades[opcion - 1];
+        return seleccionarOpcion("Prioridad:", Prioridad.values());
     }
 
     public Estado seleccionarEstado() {
-        Estado[] estados = Estado.values();
-
-        mostrarOpciones("Nuevo estado:", estados);
-
-        int opcion = leerEntero("Seleccione: ");
-
-        if (opcion < 1 || opcion > estados.length) {
-            throw new RuntimeException("Estado inválido.");
-        }
-
-        return estados[opcion - 1];
+        return seleccionarOpcion("Nuevo estado:", Estado.values());
     }
-
     private void mostrarOpciones(String titulo, Enum<?>[] opciones) {
         System.out.println();
         System.out.println(titulo);
