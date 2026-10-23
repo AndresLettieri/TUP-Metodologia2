@@ -1,0 +1,106 @@
+
+package ar.edu.metodologia.solicitudes;
+
+import ar.edu.metodologia.solicitudes.model.Estado;
+import ar.edu.metodologia.solicitudes.model.Prioridad;
+import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
+
+import java.util.Scanner;
+
+public class Consola {
+
+    private final Scanner scanner = new Scanner(System.in);
+
+    public void mostrarMenu() {
+        System.out.println();
+        System.out.println("========================================");
+        System.out.println(" Sistema de Gestión de Solicitudes");
+        System.out.println("========================================");
+        System.out.println("1. Registrar estudiante");
+        System.out.println("2. Registrar responsable");
+        System.out.println("3. Registrar solicitud");
+        System.out.println("4. Asignar responsable");
+        System.out.println("5. Cambiar estado");
+        System.out.println("6. Listar estudiantes");
+        System.out.println("7. Listar responsables");
+        System.out.println("8. Listar solicitudes");
+        System.out.println("0. Salir");
+        System.out.println("========================================");
+    }
+
+    public String leerTexto(String mensaje) {
+        System.out.print(mensaje);
+        return scanner.nextLine();
+    }
+
+    public int leerEntero(String mensaje) {
+        while (true) {
+            try {
+                return Integer.parseInt(leerTexto(mensaje));
+            } catch (NumberFormatException e) {
+                System.out.println("Debe ingresar un número válido.");
+            }
+        }
+    }
+
+    public Long leerLong(String mensaje) {
+        while (true) {
+            try {
+                return Long.parseLong(leerTexto(mensaje));
+            } catch (NumberFormatException e) {
+                System.out.println("Debe ingresar un número válido.");
+            }
+        }
+    }
+
+    public TipoSolicitud seleccionarTipoSolicitud() {
+        TipoSolicitud[] tipos = TipoSolicitud.values();
+
+        mostrarOpciones("Tipo de solicitud:", tipos);
+
+        int opcion = leerEntero("Seleccione: ");
+
+        if (opcion < 1 || opcion > tipos.length) {
+            throw new RuntimeException("Tipo de solicitud inválido.");
+        }
+
+        return tipos[opcion - 1];
+    }
+
+    public Prioridad seleccionarPrioridad() {
+        Prioridad[] prioridades = Prioridad.values();
+
+        mostrarOpciones("Prioridad:", prioridades);
+
+        int opcion = leerEntero("Seleccione: ");
+
+        if (opcion < 1 || opcion > prioridades.length) {
+            throw new RuntimeException("Prioridad inválida.");
+        }
+
+        return prioridades[opcion - 1];
+    }
+
+    public Estado seleccionarEstado() {
+        Estado[] estados = Estado.values();
+
+        mostrarOpciones("Nuevo estado:", estados);
+
+        int opcion = leerEntero("Seleccione: ");
+
+        if (opcion < 1 || opcion > estados.length) {
+            throw new RuntimeException("Estado inválido.");
+        }
+
+        return estados[opcion - 1];
+    }
+
+    private void mostrarOpciones(String titulo, Enum<?>[] opciones) {
+        System.out.println();
+        System.out.println(titulo);
+
+        for (int i = 0; i < opciones.length; i++) {
+            System.out.println((i + 1) + ". " + opciones[i]);
+        }
+    }
+}
