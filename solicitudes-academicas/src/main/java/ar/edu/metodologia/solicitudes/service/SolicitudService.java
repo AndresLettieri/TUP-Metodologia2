@@ -37,9 +37,7 @@ public class SolicitudService {
             throw new RuntimeException("El estudiante no existe.");
         }
 
-        if (descripcion == null || descripcion.trim().isEmpty()) {
-            throw new RuntimeException("La descripción es obligatoria.");
-        }
+        ValidacionesServicio.validarCampoObligatorio(descripcion, "La descripción es obligatoria.");
 
         Solicitud solicitud = new Solicitud(
                 null,

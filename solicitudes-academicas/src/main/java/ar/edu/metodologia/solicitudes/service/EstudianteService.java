@@ -18,17 +18,9 @@ public class EstudianteService {
             String email,
             String documento) {
 
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new RuntimeException("El nombre es obligatorio.");
-        }
-
-        if (email == null || email.trim().isEmpty()) {
-            throw new RuntimeException("El email es obligatorio.");
-        }
-
-        if (documento == null || documento.trim().isEmpty()) {
-            throw new RuntimeException("El documento es obligatorio.");
-        }
+        ValidacionesServicio.validarCampoObligatorio(nombre, "El nombre es obligatorio.");
+        ValidacionesServicio.validarCampoObligatorio(email, "El email es obligatorio.");
+        ValidacionesServicio.validarCampoObligatorio(documento, "El documento es obligatorio.");
 
         Estudiante estudiante = new Estudiante(
                 null,
