@@ -2,9 +2,13 @@
 package ar.edu.metodologia.solicitudes;
 
 import ar.edu.metodologia.solicitudes.model.Estado;
+import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
 import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
+import ar.edu.metodologia.solicitudes.model.Responsable;
+import ar.edu.metodologia.solicitudes.model.Solicitud;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Consola {
@@ -81,6 +85,78 @@ public class Consola {
 
         for (int i = 0; i < opciones.length; i++) {
             System.out.println((i + 1) + ". " + opciones[i]);
+        }
+    }
+
+    public void mostrarEstudiantes(List<Estudiante> estudiantes) {
+        System.out.println();
+        System.out.println("--- Estudiantes ---");
+
+        if (estudiantes.isEmpty()) {
+            System.out.println("No hay estudiantes registrados.");
+            return;
+        }
+
+        for (Estudiante estudiante : estudiantes) {
+            System.out.println(
+                    estudiante.getId() + " - "
+                            + estudiante.getNombre()
+                            + " - Documento: "
+                            + estudiante.getDocumento()
+                            + " - Email: "
+                            + estudiante.getEmail()
+            );
+        }
+    }
+
+    public void mostrarResponsables(List<Responsable> responsables) {
+        System.out.println();
+        System.out.println("--- Responsables ---");
+
+        if (responsables.isEmpty()) {
+            System.out.println("No hay responsables registrados.");
+            return;
+        }
+
+        for (Responsable responsable : responsables) {
+            System.out.println(
+                    responsable.getId() + " - "
+                            + responsable.getNombre()
+                            + " - Área: "
+                            + responsable.getArea()
+                            + " - Email: "
+                            + responsable.getEmail()
+            );
+        }
+    }
+
+    public void mostrarSolicitudes(List<Solicitud> solicitudes) {
+        System.out.println();
+        System.out.println("--- Solicitudes ---");
+
+        if (solicitudes.isEmpty()) {
+            System.out.println("No hay solicitudes registradas.");
+            return;
+        }
+
+        for (Solicitud solicitud : solicitudes) {
+            String responsable = solicitud.getResponsable() != null
+                    ? solicitud.getResponsable().getNombre()
+                    : "Sin asignar";
+
+            System.out.println(
+                    "ID: " + solicitud.getId()
+                            + " | Estudiante: "
+                            + solicitud.getEstudiante().getNombre()
+                            + " | Tipo: "
+                            + solicitud.getTipo()
+                            + " | Prioridad: "
+                            + solicitud.getPrioridad()
+                            + " | Estado: "
+                            + solicitud.getEstado()
+                            + " | Responsable: "
+                            + responsable
+            );
         }
     }
 }

@@ -211,87 +211,21 @@ public class Main {
     }
 
     private static void listarEstudiantes() {
-
-        System.out.println();
-        System.out.println("--- Estudiantes ---");
-
-        List<Estudiante> estudiantes =
-                estudianteService.listarEstudiantes();
-
-        if (estudiantes.isEmpty()) {
-            System.out.println("No hay estudiantes registrados.");
-            return;
-        }
-
-        for (Estudiante estudiante : estudiantes) {
-            System.out.println(
-                    estudiante.getId() + " - "
-                            + estudiante.getNombre()
-                            + " - Documento: "
-                            + estudiante.getDocumento()
-                            + " - Email: "
-                            + estudiante.getEmail()
-            );
-        }
+        List<Estudiante> estudiantes = estudianteService.listarEstudiantes();
+        consola.mostrarEstudiantes(estudiantes);
     }
 
     private static void listarResponsables() {
-
-        System.out.println();
-        System.out.println("--- Responsables ---");
-
         List<Responsable> responsables =
                 responsableService.listarResponsables();
 
-        if (responsables.isEmpty()) {
-            System.out.println("No hay responsables registrados.");
-            return;
-        }
-
-        for (Responsable responsable : responsables) {
-            System.out.println(
-                    responsable.getId() + " - "
-                            + responsable.getNombre()
-                            + " - Área: "
-                            + responsable.getArea()
-                            + " - Email: "
-                            + responsable.getEmail()
-            );
-        }
+        consola.mostrarResponsables(responsables);
     }
 
     private static void listarSolicitudes() {
-
-        System.out.println();
-        System.out.println("--- Solicitudes ---");
-
         List<Solicitud> solicitudes =
                 solicitudService.buscarSolicitudes();
 
-        if (solicitudes.isEmpty()) {
-            System.out.println("No hay solicitudes registradas.");
-            return;
-        }
-
-        for (Solicitud solicitud : solicitudes) {
-
-            String responsable = solicitud.getResponsable() != null
-                    ? solicitud.getResponsable().getNombre()
-                    : "Sin asignar";
-
-            System.out.println(
-                    "ID: " + solicitud.getId()
-                            + " | Estudiante: "
-                            + solicitud.getEstudiante().getNombre()
-                            + " | Tipo: "
-                            + solicitud.getTipo()
-                            + " | Prioridad: "
-                            + solicitud.getPrioridad()
-                            + " | Estado: "
-                            + solicitud.getEstado()
-                            + " | Responsable: "
-                            + responsable
-            );
-        }
+        consola.mostrarSolicitudes(solicitudes);
     }
 }
