@@ -1,6 +1,8 @@
 package ar.edu.metodologia.solicitudes;
 
 import ar.edu.metodologia.solicitudes.database.DatabaseInitializer;
+import ar.edu.metodologia.solicitudes.exception.ErrorAplicacionException;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
@@ -28,7 +30,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-        inicializarBase();
+        try {
+            inicializarBase();
+        } catch (RuntimeException e) {
+            mostrarError(e);
+            return;
+        }
 
         int opcion;
 
@@ -39,8 +46,7 @@ public class Main {
             try {
                 ejecutarOpcion(opcion);
             } catch (RuntimeException e) {
-                System.out.println();
-                System.out.println("Error: " + e.getMessage());
+                mostrarError(e);
             }
 
         } while (opcion != 0);
@@ -63,6 +69,29 @@ public class Main {
         }
 
         System.out.println();
+    }
+
+    private static void mostrarError(RuntimeException error) {
+        System.out.println();
+
+        if (error instanceof ErrorPersistenciaException) {
+            System.out.println(
+                    "No se pudo completar la operación por un problema con la base de datos."
+            );
+            error.printStackTrace(System.err);
+            return;
+        }
+
+        if (error instanceof ErrorAplicacionException) {
+            System.out.println("Error: " + error.getMessage());
+            if (error.getCause() != null) {
+                error.printStackTrace(System.err);
+            }
+            return;
+        }
+
+        System.out.println("Ocurrió un error inesperado. Consulte la salida de error para más detalles.");
+        error.printStackTrace(System.err);
     }
 
     private static void ejecutarOpcion(int opcion) {

@@ -1,5 +1,7 @@
 package ar.edu.metodologia.solicitudes.service;
 
+import ar.edu.metodologia.solicitudes.exception.ErrorValidacionException;
+
 final class ValidacionesServicio {
 
     private ValidacionesServicio() {
@@ -7,7 +9,7 @@ final class ValidacionesServicio {
 
     static void validarCampoObligatorio(String valor, String mensajeError) {
         if (valor == null || valor.trim().isEmpty()) {
-            throw new RuntimeException(mensajeError);
+            throw new ErrorValidacionException(mensajeError);
         }
     }
 }

@@ -1,6 +1,7 @@
 package ar.edu.metodologia.solicitudes.repository;
 
 import ar.edu.metodologia.solicitudes.database.DatabaseConnection;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 
 import java.sql.Connection;
@@ -38,7 +39,7 @@ public class EstudianteRepository {
             return estudiante;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al guardar estudiante", e);
+            throw new ErrorPersistenciaException("Error al guardar estudiante", e);
         }
     }
 
@@ -64,7 +65,7 @@ public class EstudianteRepository {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al buscar estudiante", e);
+            throw new ErrorPersistenciaException("Error al buscar estudiante", e);
         }
     }
 
@@ -88,7 +89,7 @@ public class EstudianteRepository {
             return estudiantes;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al obtener estudiantes", e);
+            throw new ErrorPersistenciaException("Error al obtener estudiantes", e);
         }
     }
 

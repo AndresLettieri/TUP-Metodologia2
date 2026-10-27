@@ -1,5 +1,7 @@
 package ar.edu.metodologia.solicitudes.service;
 
+import ar.edu.metodologia.solicitudes.exception.EntidadNoEncontradaException;
+import ar.edu.metodologia.solicitudes.exception.ReglaNegocioException;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
@@ -34,7 +36,7 @@ public class SolicitudService {
         Estudiante estudiante = estudianteRepository.buscarPorId(estudianteId);
 
         if (estudiante == null) {
-            throw new RuntimeException("El estudiante no existe.");
+            throw new EntidadNoEncontradaException("El estudiante no existe.");
         }
 
         ValidacionesServicio.validarCampoObligatorio(descripcion, "La descripción es obligatoria.");
@@ -58,13 +60,13 @@ public class SolicitudService {
         Solicitud solicitud = solicitudRepository.buscarPorId(solicitudId);
 
         if (solicitud == null) {
-            throw new RuntimeException("La solicitud no existe.");
+            throw new EntidadNoEncontradaException("La solicitud no existe.");
         }
 
         Responsable responsable = responsableRepository.buscarPorId(responsableId);
 
         if (responsable == null) {
-            throw new RuntimeException("El responsable no existe.");
+            throw new EntidadNoEncontradaException("El responsable no existe.");
         }
 
         solicitud.setResponsable(responsable);
@@ -77,7 +79,7 @@ public class SolicitudService {
         Solicitud solicitud = solicitudRepository.buscarPorId(solicitudId);
 
         if (solicitud == null) {
-            throw new RuntimeException("La solicitud no existe.");
+            throw new EntidadNoEncontradaException("La solicitud no existe.");
         }
 
         validarCambioEstado(solicitud, nuevoEstado);
@@ -100,7 +102,7 @@ public class SolicitudService {
             Estado nuevoEstado) {
 
         if (solicitud.getEstado() == Estado.CANCELADA) {
-            throw new RuntimeException(
+            throw new ReglaNegocioException(
                     "Una solicitud cancelada no puede continuar procesándose."
             );
         }
@@ -108,7 +110,7 @@ public class SolicitudService {
         if (solicitud.getEstado() == Estado.RESUELTA
                 && nuevoEstado == Estado.PENDIENTE) {
 
-            throw new RuntimeException(
+            throw new ReglaNegocioException(
                     "Una solicitud resuelta no puede volver a pendiente."
             );
         }
@@ -116,7 +118,7 @@ public class SolicitudService {
         if (nuevoEstado == Estado.RESUELTA
                 && solicitud.getResponsable() == null) {
 
-            throw new RuntimeException(
+            throw new ReglaNegocioException(
                     "No se puede resolver una solicitud sin responsable."
             );
         }
