@@ -1,6 +1,7 @@
 package ar.edu.metodologia.solicitudes.repository;
 
 import ar.edu.metodologia.solicitudes.database.DatabaseConnection;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
@@ -66,7 +67,7 @@ public class SolicitudRepository {
             return solicitud;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al guardar solicitud", e);
+            throw new ErrorPersistenciaException("Error al guardar solicitud", e);
         }
     }
 
@@ -113,7 +114,7 @@ public class SolicitudRepository {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al buscar solicitud", e);
+            throw new ErrorPersistenciaException("Error al buscar solicitud", e);
         }
     }
 
@@ -158,7 +159,7 @@ public class SolicitudRepository {
             return solicitudes;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al obtener solicitudes", e);
+            throw new ErrorPersistenciaException("Error al obtener solicitudes", e);
         }
     }
 
@@ -217,7 +218,7 @@ public class SolicitudRepository {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al actualizar responsable", e);
+            throw new ErrorPersistenciaException("Error al actualizar responsable", e);
         }
     }
 
@@ -237,7 +238,7 @@ public class SolicitudRepository {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al actualizar estado", e);
+            throw new ErrorPersistenciaException("Error al actualizar estado", e);
         }
     }
 }

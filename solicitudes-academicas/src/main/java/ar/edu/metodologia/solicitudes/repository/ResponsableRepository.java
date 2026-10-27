@@ -1,6 +1,7 @@
 package ar.edu.metodologia.solicitudes.repository;
 
 import ar.edu.metodologia.solicitudes.database.DatabaseConnection;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 
 import java.sql.Connection;
@@ -38,7 +39,7 @@ public class ResponsableRepository {
             return responsable;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al guardar responsable", e);
+            throw new ErrorPersistenciaException("Error al guardar responsable", e);
         }
     }
 
@@ -64,7 +65,7 @@ public class ResponsableRepository {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al buscar responsable", e);
+            throw new ErrorPersistenciaException("Error al buscar responsable", e);
         }
     }
 
@@ -88,7 +89,7 @@ public class ResponsableRepository {
             return responsables;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error al obtener responsables", e);
+            throw new ErrorPersistenciaException("Error al obtener responsables", e);
         }
     }
 

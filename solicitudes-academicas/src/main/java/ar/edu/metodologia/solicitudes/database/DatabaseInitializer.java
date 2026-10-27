@@ -1,11 +1,16 @@
 package ar.edu.metodologia.solicitudes.database;
 
+import ar.edu.metodologia.solicitudes.exception.ErrorAplicacionException;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseInitializer {
@@ -27,8 +32,8 @@ public class DatabaseInitializer {
 
             return false;
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error al verificar la base de datos", e);
+        } catch (SQLException e) {
+            throw new ErrorPersistenciaException("Error al verificar la base de datos", e);
         }
     }
 
@@ -40,7 +45,7 @@ public class DatabaseInitializer {
                         .getResourceAsStream("schema.sql")
         ) {
             if (inputStream == null) {
-                throw new RuntimeException("No se encontró el archivo schema.sql");
+                throw new ErrorAplicacionException("No se encontró el archivo schema.sql");
             }
 
             StringBuilder script = new StringBuilder();
@@ -65,8 +70,12 @@ public class DatabaseInitializer {
                 }
             }
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error al inicializar la base de datos", e);
+        } catch (ErrorAplicacionException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new ErrorPersistenciaException("Error al inicializar la base de datos", e);
+        } catch (IOException e) {
+            throw new ErrorAplicacionException("Error al leer el archivo schema.sql", e);
         }
     }
 }
