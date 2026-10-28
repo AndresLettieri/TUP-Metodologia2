@@ -1,8 +1,10 @@
 package ar.edu.metodologia.solicitudes.repository;
 
-import ar.edu.metodologia.solicitudes.database.JdbcExecutor;
+import ar.edu.metodologia.solicitudes.database.DatabaseConnection;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,26 +19,28 @@ public class ResponsableRepository implements ResponsableRepositoryPort {
                 VALUES (?, ?, ?)
                 """;
 
-        return JdbcExecutor.ejecutar("Error al guardar responsable", connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(
-                    sql,
-                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     sql,
+                     java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
-                statement.setString(1, responsable.getNombre());
-                statement.setString(2, responsable.getArea());
-                statement.setString(3, responsable.getEmail());
+            statement.setString(1, responsable.getNombre());
+            statement.setString(2, responsable.getArea());
+            statement.setString(3, responsable.getEmail());
 
-                statement.executeUpdate();
+            statement.executeUpdate();
 
-                try (ResultSet keys = statement.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        responsable.setId(keys.getLong(1));
-                    }
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                if (keys.next()) {
+                    responsable.setId(keys.getLong(1));
                 }
-
-                return responsable;
             }
-        });
+
+            return responsable;
+
+        } catch (SQLException e) {
+            throw new ErrorPersistenciaException("Error al guardar responsable", e);
+        }
     }
 
     @Override
@@ -47,19 +51,23 @@ public class ResponsableRepository implements ResponsableRepositoryPort {
                 WHERE id = ?
                 """;
 
-        return JdbcExecutor.ejecutar("Error al buscar responsable", connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setLong(1, id);
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next()) {
-                        return mapearResponsable(resultSet);
-                    }
+            statement.setLong(1, id);
 
-                    return null;
+            try (ResultSet resultSet = statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return mapearResponsable(resultSet);
                 }
+
+                return null;
             }
-        });
+
+        } catch (SQLException e) {
+            throw new ErrorPersistenciaException("Error al buscar responsable", e);
+        }
     }
 
     public List<Responsable> buscarTodos() {
@@ -71,16 +79,19 @@ public class ResponsableRepository implements ResponsableRepositoryPort {
 
         List<Responsable> responsables = new ArrayList<>();
 
-        return JdbcExecutor.ejecutar("Error al obtener responsables", connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql);
-                 ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    responsables.add(mapearResponsable(resultSet));
-                }
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                responsables.add(mapearResponsable(resultSet));
             }
 
             return responsables;
-        });
+
+        } catch (SQLException e) {
+            throw new ErrorPersistenciaException("Error al obtener responsables", e);
+        }
     }
 
     private Responsable mapearResponsable(ResultSet resultSet) throws SQLException {
