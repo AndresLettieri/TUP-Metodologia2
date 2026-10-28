@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResponsableRepository {
+public class ResponsableRepository implements ResponsableRepositoryPort {
 
     public Responsable guardar(Responsable responsable) {
         String sql = """
@@ -43,6 +43,7 @@ public class ResponsableRepository {
         }
     }
 
+    @Override
     public Responsable buscarPorId(Long id) {
         String sql = """
                 SELECT id, nombre, area, email

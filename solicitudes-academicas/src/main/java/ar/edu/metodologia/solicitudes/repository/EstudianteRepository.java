@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EstudianteRepository {
+public class EstudianteRepository implements EstudianteRepositoryPort {
 
     public Estudiante guardar(Estudiante estudiante) {
         String sql = """
@@ -43,6 +43,7 @@ public class EstudianteRepository {
         }
     }
 
+    @Override
     public Estudiante buscarPorId(Long id) {
         String sql = """
                 SELECT id, nombre, email, documento

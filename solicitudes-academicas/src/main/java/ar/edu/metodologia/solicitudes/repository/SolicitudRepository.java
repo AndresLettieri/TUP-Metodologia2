@@ -18,8 +18,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SolicitudRepository {
+public class SolicitudRepository implements SolicitudRepositoryPort {
 
+    @Override
     public Solicitud guardar(Solicitud solicitud) {
         String sql = """
                 INSERT INTO solicitud (
@@ -71,6 +72,7 @@ public class SolicitudRepository {
         }
     }
 
+    @Override
     public Solicitud buscarPorId(Long id) {
         String sql = """
                 SELECT
@@ -118,6 +120,7 @@ public class SolicitudRepository {
         }
     }
 
+    @Override
     public List<Solicitud> buscarTodas() {
         String sql = """
                 SELECT
@@ -197,6 +200,7 @@ public class SolicitudRepository {
         );
     }
 
+    @Override
     public void actualizarResponsable(Solicitud solicitud) {
         String sql = """
             UPDATE solicitud
@@ -222,6 +226,7 @@ public class SolicitudRepository {
         }
     }
 
+    @Override
     public void actualizarEstado(Solicitud solicitud) {
         String sql = """
             UPDATE solicitud
