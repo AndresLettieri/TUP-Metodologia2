@@ -1,7 +1,6 @@
 package ar.edu.metodologia.solicitudes.repository;
 
-import ar.edu.metodologia.solicitudes.database.DatabaseConnection;
-import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
+import ar.edu.metodologia.solicitudes.database.JdbcExecutor;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
@@ -9,7 +8,6 @@ import ar.edu.metodologia.solicitudes.model.Responsable;
 import ar.edu.metodologia.solicitudes.model.Solicitud;
 import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,41 +33,39 @@ public class SolicitudRepository implements SolicitudRepositoryPort {
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     sql,
-                     java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        return JdbcExecutor.ejecutar("Error al guardar solicitud", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    sql,
+                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
-            statement.setLong(1, solicitud.getEstudiante().getId());
-            statement.setString(2, solicitud.getTipo().name());
-            statement.setString(3, solicitud.getDescripcion());
-            statement.setString(4, solicitud.getPrioridad().name());
-            statement.setString(5, solicitud.getEstado().name());
+                statement.setLong(1, solicitud.getEstudiante().getId());
+                statement.setString(2, solicitud.getTipo().name());
+                statement.setString(3, solicitud.getDescripcion());
+                statement.setString(4, solicitud.getPrioridad().name());
+                statement.setString(5, solicitud.getEstado().name());
 
-            if (solicitud.getResponsable() != null) {
-                statement.setLong(6, solicitud.getResponsable().getId());
-            } else {
-                statement.setNull(6, java.sql.Types.BIGINT);
-            }
-
-            statement.setTimestamp(
-                    7,
-                    Timestamp.valueOf(solicitud.getFechaCreacion())
-            );
-
-            statement.executeUpdate();
-
-            try (ResultSet keys = statement.getGeneratedKeys()) {
-                if (keys.next()) {
-                    solicitud.setId(keys.getLong(1));
+                if (solicitud.getResponsable() != null) {
+                    statement.setLong(6, solicitud.getResponsable().getId());
+                } else {
+                    statement.setNull(6, java.sql.Types.BIGINT);
                 }
+
+                statement.setTimestamp(
+                        7,
+                        Timestamp.valueOf(solicitud.getFechaCreacion())
+                );
+
+                statement.executeUpdate();
+
+                try (ResultSet keys = statement.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        solicitud.setId(keys.getLong(1));
+                    }
+                }
+
+                return solicitud;
             }
-
-            return solicitud;
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al guardar solicitud", e);
-        }
+        });
     }
 
     @Override
@@ -101,23 +97,19 @@ public class SolicitudRepository implements SolicitudRepositoryPort {
                 WHERE s.id = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        return JdbcExecutor.ejecutar("Error al buscar solicitud", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setLong(1, id);
 
-            statement.setLong(1, id);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return mapearSolicitud(resultSet);
+                    }
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-
-                if (resultSet.next()) {
-                    return mapearSolicitud(resultSet);
+                    return null;
                 }
-
-                return null;
             }
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al buscar solicitud", e);
-        }
+        });
     }
 
     @Override
@@ -149,21 +141,18 @@ public class SolicitudRepository implements SolicitudRepositoryPort {
                 ORDER BY s.fecha_creacion DESC
                 """;
 
-        List<Solicitud> solicitudes = new ArrayList<>();
+        return JdbcExecutor.ejecutar("Error al obtener solicitudes", connection -> {
+            List<Solicitud> solicitudes = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                solicitudes.add(mapearSolicitud(resultSet));
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    solicitudes.add(mapearSolicitud(resultSet));
+                }
             }
 
             return solicitudes;
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al obtener solicitudes", e);
-        }
+        });
     }
 
     private Solicitud mapearSolicitud(ResultSet resultSet) throws SQLException {
@@ -208,22 +197,22 @@ public class SolicitudRepository implements SolicitudRepositoryPort {
             WHERE id = ?
             """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        JdbcExecutor.ejecutar("Error al actualizar responsable", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            if (solicitud.getResponsable() != null) {
-                statement.setLong(1, solicitud.getResponsable().getId());
-            } else {
-                statement.setNull(1, java.sql.Types.BIGINT);
+                if (solicitud.getResponsable() != null) {
+                    statement.setLong(1, solicitud.getResponsable().getId());
+                } else {
+                    statement.setNull(1, java.sql.Types.BIGINT);
+                }
+
+                statement.setLong(2, solicitud.getId());
+
+                statement.executeUpdate();
             }
 
-            statement.setLong(2, solicitud.getId());
-
-            statement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al actualizar responsable", e);
-        }
+            return null;
+        });
     }
 
     @Override
@@ -234,16 +223,16 @@ public class SolicitudRepository implements SolicitudRepositoryPort {
             WHERE id = ?
             """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        JdbcExecutor.ejecutar("Error al actualizar estado", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, solicitud.getEstado().name());
-            statement.setLong(2, solicitud.getId());
+                statement.setString(1, solicitud.getEstado().name());
+                statement.setLong(2, solicitud.getId());
 
-            statement.executeUpdate();
+                statement.executeUpdate();
+            }
 
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al actualizar estado", e);
-        }
+            return null;
+        });
     }
 }

@@ -1,10 +1,8 @@
 package ar.edu.metodologia.solicitudes.repository;
 
-import ar.edu.metodologia.solicitudes.database.DatabaseConnection;
-import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
+import ar.edu.metodologia.solicitudes.database.JdbcExecutor;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,28 +17,26 @@ public class EstudianteRepository implements EstudianteRepositoryPort {
                 VALUES (?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     sql,
-                     java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        return JdbcExecutor.ejecutar("Error al guardar estudiante", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    sql,
+                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
-            statement.setString(1, estudiante.getNombre());
-            statement.setString(2, estudiante.getEmail());
-            statement.setString(3, estudiante.getDocumento());
+                statement.setString(1, estudiante.getNombre());
+                statement.setString(2, estudiante.getEmail());
+                statement.setString(3, estudiante.getDocumento());
 
-            statement.executeUpdate();
+                statement.executeUpdate();
 
-            try (ResultSet keys = statement.getGeneratedKeys()) {
-                if (keys.next()) {
-                    estudiante.setId(keys.getLong(1));
+                try (ResultSet keys = statement.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        estudiante.setId(keys.getLong(1));
+                    }
                 }
+
+                return estudiante;
             }
-
-            return estudiante;
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al guardar estudiante", e);
-        }
+        });
     }
 
     @Override
@@ -51,23 +47,19 @@ public class EstudianteRepository implements EstudianteRepositoryPort {
                 WHERE id = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        return JdbcExecutor.ejecutar("Error al buscar estudiante", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setLong(1, id);
 
-            statement.setLong(1, id);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return mapearEstudiante(resultSet);
+                    }
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-
-                if (resultSet.next()) {
-                    return mapearEstudiante(resultSet);
+                    return null;
                 }
-
-                return null;
             }
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al buscar estudiante", e);
-        }
+        });
     }
 
     public List<Estudiante> buscarTodos() {
@@ -79,19 +71,16 @@ public class EstudianteRepository implements EstudianteRepositoryPort {
 
         List<Estudiante> estudiantes = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                estudiantes.add(mapearEstudiante(resultSet));
+        return JdbcExecutor.ejecutar("Error al obtener estudiantes", connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    estudiantes.add(mapearEstudiante(resultSet));
+                }
             }
 
             return estudiantes;
-
-        } catch (SQLException e) {
-            throw new ErrorPersistenciaException("Error al obtener estudiantes", e);
-        }
+        });
     }
 
     private Estudiante mapearEstudiante(ResultSet resultSet) throws SQLException {
