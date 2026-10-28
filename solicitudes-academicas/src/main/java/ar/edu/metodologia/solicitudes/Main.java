@@ -9,6 +9,9 @@ import ar.edu.metodologia.solicitudes.model.Prioridad;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 import ar.edu.metodologia.solicitudes.model.Solicitud;
 import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
+import ar.edu.metodologia.solicitudes.repository.EstudianteRepository;
+import ar.edu.metodologia.solicitudes.repository.ResponsableRepository;
+import ar.edu.metodologia.solicitudes.repository.SolicitudRepository;
 import ar.edu.metodologia.solicitudes.service.EstudianteService;
 import ar.edu.metodologia.solicitudes.service.ResponsableService;
 import ar.edu.metodologia.solicitudes.service.SolicitudService;
@@ -24,7 +27,11 @@ public class Main {
             new ResponsableService();
 
     private static final SolicitudService solicitudService =
-            new SolicitudService();
+            new SolicitudService(
+                    new SolicitudRepository(),
+                    new EstudianteRepository(),
+                    new ResponsableRepository()
+            );
 
     private static final Consola consola = new Consola();
 

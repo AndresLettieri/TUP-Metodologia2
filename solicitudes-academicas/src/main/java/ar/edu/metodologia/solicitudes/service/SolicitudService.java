@@ -8,23 +8,36 @@ import ar.edu.metodologia.solicitudes.model.Prioridad;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 import ar.edu.metodologia.solicitudes.model.Solicitud;
 import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
-import ar.edu.metodologia.solicitudes.repository.EstudianteRepository;
-import ar.edu.metodologia.solicitudes.repository.ResponsableRepository;
-import ar.edu.metodologia.solicitudes.repository.SolicitudRepository;
+import ar.edu.metodologia.solicitudes.repository.EstudianteRepositoryPort;
+import ar.edu.metodologia.solicitudes.repository.ResponsableRepositoryPort;
+import ar.edu.metodologia.solicitudes.repository.SolicitudRepositoryPort;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public class SolicitudService {
 
-    private final SolicitudRepository solicitudRepository;
-    private final EstudianteRepository estudianteRepository;
-    private final ResponsableRepository responsableRepository;
+    private final SolicitudRepositoryPort solicitudRepository;
+    private final EstudianteRepositoryPort estudianteRepository;
+    private final ResponsableRepositoryPort responsableRepository;
 
-    public SolicitudService() {
-        this.solicitudRepository = new SolicitudRepository();
-        this.estudianteRepository = new EstudianteRepository();
-        this.responsableRepository = new ResponsableRepository();
+    public SolicitudService(
+            SolicitudRepositoryPort solicitudRepository,
+            EstudianteRepositoryPort estudianteRepository,
+            ResponsableRepositoryPort responsableRepository) {
+        this.solicitudRepository = Objects.requireNonNull(
+                solicitudRepository,
+                "solicitudRepository no puede ser null"
+        );
+        this.estudianteRepository = Objects.requireNonNull(
+                estudianteRepository,
+                "estudianteRepository no puede ser null"
+        );
+        this.responsableRepository = Objects.requireNonNull(
+                responsableRepository,
+                "responsableRepository no puede ser null"
+        );
     }
 
     public Solicitud registrarSolicitud(
