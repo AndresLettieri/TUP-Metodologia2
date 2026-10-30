@@ -66,9 +66,11 @@ La aplicación se ejecuta mediante una interfaz de consola.
 
 ## Estructura de documentación
 
-El repositorio incluye una carpeta `docs` con documentación relacionada con el análisis y la evolución del proyecto.
+El repositorio incluye una carpeta `docs` con documentación relacionada con el análisis, la revisión y la evolución del proyecto.
 
 - `diagnostico.md`: relevamiento y diagnóstico inicial del código.
+- `checklist-revision-codigo.md`: criterios utilizados para revisar la calidad del código.
+- `decisiones-tecnicas.md`: decisiones adoptadas durante el proceso de refactorización y sus justificaciones.
 - `pruebas-regresion.md`: casos de prueba ejecutados luego de la refactorización.
 - `evidencias/`: capturas que respaldan la ejecución de las pruebas.
 
