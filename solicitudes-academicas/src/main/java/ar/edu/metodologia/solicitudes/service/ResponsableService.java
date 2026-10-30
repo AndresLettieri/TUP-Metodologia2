@@ -18,17 +18,9 @@ public class ResponsableService {
             String area,
             String email) {
 
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new RuntimeException("El nombre es obligatorio.");
-        }
-
-        if (area == null || area.trim().isEmpty()) {
-            throw new RuntimeException("El área es obligatoria.");
-        }
-
-        if (email == null || email.trim().isEmpty()) {
-            throw new RuntimeException("El email es obligatorio.");
-        }
+        ValidacionesServicio.validarCampoObligatorio(nombre, "El nombre es obligatorio.");
+        ValidacionesServicio.validarCampoObligatorio(area, "El área es obligatoria.");
+        ValidacionesServicio.validarCampoObligatorio(email, "El email es obligatorio.");
 
         Responsable responsable = new Responsable(
                 null,

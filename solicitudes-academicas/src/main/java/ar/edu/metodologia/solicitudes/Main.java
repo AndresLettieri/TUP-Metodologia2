@@ -1,22 +1,24 @@
 package ar.edu.metodologia.solicitudes;
 
 import ar.edu.metodologia.solicitudes.database.DatabaseInitializer;
+import ar.edu.metodologia.solicitudes.exception.ErrorAplicacionException;
+import ar.edu.metodologia.solicitudes.exception.ErrorPersistenciaException;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 import ar.edu.metodologia.solicitudes.model.Solicitud;
 import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
+import ar.edu.metodologia.solicitudes.repository.EstudianteRepository;
+import ar.edu.metodologia.solicitudes.repository.ResponsableRepository;
+import ar.edu.metodologia.solicitudes.repository.SolicitudRepository;
 import ar.edu.metodologia.solicitudes.service.EstudianteService;
 import ar.edu.metodologia.solicitudes.service.ResponsableService;
 import ar.edu.metodologia.solicitudes.service.SolicitudService;
 
 import java.util.List;
-import java.util.Scanner;
 
 public class Main {
-
-    private static final Scanner scanner = new Scanner(System.in);
 
     private static final EstudianteService estudianteService =
             new EstudianteService();
@@ -25,23 +27,33 @@ public class Main {
             new ResponsableService();
 
     private static final SolicitudService solicitudService =
-            new SolicitudService();
+            new SolicitudService(
+                    new SolicitudRepository(),
+                    new EstudianteRepository(),
+                    new ResponsableRepository()
+            );
+
+    private static final Consola consola = new Consola();
 
     public static void main(String[] args) {
 
-        inicializarBase();
+        try {
+            inicializarBase();
+        } catch (RuntimeException e) {
+            mostrarError(e);
+            return;
+        }
 
         int opcion;
 
         do {
-            mostrarMenu();
-            opcion = leerEntero("Seleccione una opción: ");
+            consola.mostrarMenu();
+            opcion = consola.leerEntero("Seleccione una opción: ");
 
             try {
                 ejecutarOpcion(opcion);
             } catch (RuntimeException e) {
-                System.out.println();
-                System.out.println("Error: " + e.getMessage());
+                mostrarError(e);
             }
 
         } while (opcion != 0);
@@ -66,22 +78,27 @@ public class Main {
         System.out.println();
     }
 
-    private static void mostrarMenu() {
-
+    private static void mostrarError(RuntimeException error) {
         System.out.println();
-        System.out.println("========================================");
-        System.out.println(" Sistema de Gestión de Solicitudes");
-        System.out.println("========================================");
-        System.out.println("1. Registrar estudiante");
-        System.out.println("2. Registrar responsable");
-        System.out.println("3. Registrar solicitud");
-        System.out.println("4. Asignar responsable");
-        System.out.println("5. Cambiar estado");
-        System.out.println("6. Listar estudiantes");
-        System.out.println("7. Listar responsables");
-        System.out.println("8. Listar solicitudes");
-        System.out.println("0. Salir");
-        System.out.println("========================================");
+
+        if (error instanceof ErrorPersistenciaException) {
+            System.out.println(
+                    "No se pudo completar la operación por un problema con la base de datos."
+            );
+            error.printStackTrace(System.err);
+            return;
+        }
+
+        if (error instanceof ErrorAplicacionException) {
+            System.out.println("Error: " + error.getMessage());
+            if (error.getCause() != null) {
+                error.printStackTrace(System.err);
+            }
+            return;
+        }
+
+        System.out.println("Ocurrió un error inesperado. Consulte la salida de error para más detalles.");
+        error.printStackTrace(System.err);
     }
 
     private static void ejecutarOpcion(int opcion) {
@@ -133,9 +150,9 @@ public class Main {
         System.out.println();
         System.out.println("--- Registrar estudiante ---");
 
-        String nombre = leerTexto("Nombre: ");
-        String email = leerTexto("Email: ");
-        String documento = leerTexto("Documento: ");
+        String nombre = consola.leerTexto("Nombre: ");
+        String email = consola.leerTexto("Email: ");
+        String documento = consola.leerTexto("Documento: ");
 
         Estudiante estudiante = estudianteService.registrarEstudiante(
                 nombre,
@@ -154,9 +171,9 @@ public class Main {
         System.out.println();
         System.out.println("--- Registrar responsable ---");
 
-        String nombre = leerTexto("Nombre: ");
-        String area = leerTexto("Área: ");
-        String email = leerTexto("Email: ");
+        String nombre = consola.leerTexto("Nombre: ");
+        String area = consola.leerTexto("Área: ");
+        String email = consola.leerTexto("Email: ");
 
         Responsable responsable = responsableService.registrarResponsable(
                 nombre,
@@ -175,13 +192,13 @@ public class Main {
         System.out.println();
         System.out.println("--- Registrar solicitud ---");
 
-        Long estudianteId = leerLong("ID del estudiante: ");
+        Long estudianteId = consola.leerLong("ID del estudiante: ");
 
-        TipoSolicitud tipo = seleccionarTipoSolicitud();
+        TipoSolicitud tipo = consola.seleccionarTipoSolicitud();
 
-        String descripcion = leerTexto("Descripción: ");
+        String descripcion = consola.leerTexto("Descripción: ");
 
-        Prioridad prioridad = seleccionarPrioridad();
+        Prioridad prioridad = consola.seleccionarPrioridad();
 
         Solicitud solicitud = solicitudService.registrarSolicitud(
                 estudianteId,
@@ -201,8 +218,8 @@ public class Main {
         System.out.println();
         System.out.println("--- Asignar responsable ---");
 
-        Long solicitudId = leerLong("ID de la solicitud: ");
-        Long responsableId = leerLong("ID del responsable: ");
+        Long solicitudId = consola.leerLong("ID de la solicitud: ");
+        Long responsableId = consola.leerLong("ID del responsable: ");
 
         solicitudService.asignarResponsable(
                 solicitudId,
@@ -217,9 +234,9 @@ public class Main {
         System.out.println();
         System.out.println("--- Cambiar estado ---");
 
-        Long solicitudId = leerLong("ID de la solicitud: ");
+        Long solicitudId = consola.leerLong("ID de la solicitud: ");
 
-        Estado nuevoEstado = seleccionarEstado();
+        Estado nuevoEstado = consola.seleccionarEstado();
 
         solicitudService.cambiarEstado(
                 solicitudId,
@@ -230,180 +247,21 @@ public class Main {
     }
 
     private static void listarEstudiantes() {
-
-        System.out.println();
-        System.out.println("--- Estudiantes ---");
-
-        List<Estudiante> estudiantes =
-                estudianteService.listarEstudiantes();
-
-        if (estudiantes.isEmpty()) {
-            System.out.println("No hay estudiantes registrados.");
-            return;
-        }
-
-        for (Estudiante estudiante : estudiantes) {
-            System.out.println(
-                    estudiante.getId() + " - "
-                            + estudiante.getNombre()
-                            + " - Documento: "
-                            + estudiante.getDocumento()
-                            + " - Email: "
-                            + estudiante.getEmail()
-            );
-        }
+        List<Estudiante> estudiantes = estudianteService.listarEstudiantes();
+        consola.mostrarEstudiantes(estudiantes);
     }
 
     private static void listarResponsables() {
-
-        System.out.println();
-        System.out.println("--- Responsables ---");
-
         List<Responsable> responsables =
                 responsableService.listarResponsables();
 
-        if (responsables.isEmpty()) {
-            System.out.println("No hay responsables registrados.");
-            return;
-        }
-
-        for (Responsable responsable : responsables) {
-            System.out.println(
-                    responsable.getId() + " - "
-                            + responsable.getNombre()
-                            + " - Área: "
-                            + responsable.getArea()
-                            + " - Email: "
-                            + responsable.getEmail()
-            );
-        }
+        consola.mostrarResponsables(responsables);
     }
 
     private static void listarSolicitudes() {
-
-        System.out.println();
-        System.out.println("--- Solicitudes ---");
-
         List<Solicitud> solicitudes =
                 solicitudService.buscarSolicitudes();
 
-        if (solicitudes.isEmpty()) {
-            System.out.println("No hay solicitudes registradas.");
-            return;
-        }
-
-        for (Solicitud solicitud : solicitudes) {
-
-            String responsable = solicitud.getResponsable() != null
-                    ? solicitud.getResponsable().getNombre()
-                    : "Sin asignar";
-
-            System.out.println(
-                    "ID: " + solicitud.getId()
-                            + " | Estudiante: "
-                            + solicitud.getEstudiante().getNombre()
-                            + " | Tipo: "
-                            + solicitud.getTipo()
-                            + " | Prioridad: "
-                            + solicitud.getPrioridad()
-                            + " | Estado: "
-                            + solicitud.getEstado()
-                            + " | Responsable: "
-                            + responsable
-            );
-        }
-    }
-
-    private static TipoSolicitud seleccionarTipoSolicitud() {
-
-        System.out.println();
-        System.out.println("Tipo de solicitud:");
-
-        TipoSolicitud[] tipos = TipoSolicitud.values();
-
-        for (int i = 0; i < tipos.length; i++) {
-            System.out.println(
-                    (i + 1) + ". " + tipos[i]
-            );
-        }
-
-        int opcion = leerEntero("Seleccione: ");
-
-        if (opcion < 1 || opcion > tipos.length) {
-            throw new RuntimeException("Tipo de solicitud inválido.");
-        }
-
-        return tipos[opcion - 1];
-    }
-
-    private static Prioridad seleccionarPrioridad() {
-
-        System.out.println();
-        System.out.println("Prioridad:");
-
-        Prioridad[] prioridades = Prioridad.values();
-
-        for (int i = 0; i < prioridades.length; i++) {
-            System.out.println(
-                    (i + 1) + ". " + prioridades[i]
-            );
-        }
-
-        int opcion = leerEntero("Seleccione: ");
-
-        if (opcion < 1 || opcion > prioridades.length) {
-            throw new RuntimeException("Prioridad inválida.");
-        }
-
-        return prioridades[opcion - 1];
-    }
-
-    private static Estado seleccionarEstado() {
-
-        System.out.println();
-        System.out.println("Nuevo estado:");
-
-        Estado[] estados = Estado.values();
-
-        for (int i = 0; i < estados.length; i++) {
-            System.out.println(
-                    (i + 1) + ". " + estados[i]
-            );
-        }
-
-        int opcion = leerEntero("Seleccione: ");
-
-        if (opcion < 1 || opcion > estados.length) {
-            throw new RuntimeException("Estado inválido.");
-        }
-
-        return estados[opcion - 1];
-    }
-
-    private static String leerTexto(String mensaje) {
-        System.out.print(mensaje);
-        return scanner.nextLine();
-    }
-
-    private static int leerEntero(String mensaje) {
-
-        while (true) {
-            try {
-                return Integer.parseInt(leerTexto(mensaje));
-            } catch (NumberFormatException e) {
-                System.out.println("Debe ingresar un número válido.");
-            }
-        }
-    }
-
-    private static Long leerLong(String mensaje) {
-
-        while (true) {
-            try {
-                return Long.parseLong(leerTexto(mensaje));
-            } catch (NumberFormatException e) {
-                System.out.println("Debe ingresar un número válido.");
-            }
-        }
+        consola.mostrarSolicitudes(solicitudes);
     }
 }

@@ -1,28 +1,43 @@
 package ar.edu.metodologia.solicitudes.service;
 
+import ar.edu.metodologia.solicitudes.exception.EntidadNoEncontradaException;
+import ar.edu.metodologia.solicitudes.exception.ReglaNegocioException;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
 import ar.edu.metodologia.solicitudes.model.Prioridad;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 import ar.edu.metodologia.solicitudes.model.Solicitud;
 import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
-import ar.edu.metodologia.solicitudes.repository.EstudianteRepository;
-import ar.edu.metodologia.solicitudes.repository.ResponsableRepository;
-import ar.edu.metodologia.solicitudes.repository.SolicitudRepository;
+import ar.edu.metodologia.solicitudes.repository.EstudianteRepositoryPort;
+import ar.edu.metodologia.solicitudes.repository.ResponsableRepositoryPort;
+import ar.edu.metodologia.solicitudes.repository.SolicitudRepositoryPort;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public class SolicitudService {
 
-    private final SolicitudRepository solicitudRepository;
-    private final EstudianteRepository estudianteRepository;
-    private final ResponsableRepository responsableRepository;
+    private final SolicitudRepositoryPort solicitudRepository;
+    private final EstudianteRepositoryPort estudianteRepository;
+    private final ResponsableRepositoryPort responsableRepository;
 
-    public SolicitudService() {
-        this.solicitudRepository = new SolicitudRepository();
-        this.estudianteRepository = new EstudianteRepository();
-        this.responsableRepository = new ResponsableRepository();
+    public SolicitudService(
+            SolicitudRepositoryPort solicitudRepository,
+            EstudianteRepositoryPort estudianteRepository,
+            ResponsableRepositoryPort responsableRepository) {
+        this.solicitudRepository = Objects.requireNonNull(
+                solicitudRepository,
+                "solicitudRepository no puede ser null"
+        );
+        this.estudianteRepository = Objects.requireNonNull(
+                estudianteRepository,
+                "estudianteRepository no puede ser null"
+        );
+        this.responsableRepository = Objects.requireNonNull(
+                responsableRepository,
+                "responsableRepository no puede ser null"
+        );
     }
 
     public Solicitud registrarSolicitud(
@@ -34,12 +49,10 @@ public class SolicitudService {
         Estudiante estudiante = estudianteRepository.buscarPorId(estudianteId);
 
         if (estudiante == null) {
-            throw new RuntimeException("El estudiante no existe.");
+            throw new EntidadNoEncontradaException("El estudiante no existe.");
         }
 
-        if (descripcion == null || descripcion.trim().isEmpty()) {
-            throw new RuntimeException("La descripción es obligatoria.");
-        }
+        ValidacionesServicio.validarCampoObligatorio(descripcion, "La descripción es obligatoria.");
 
         Solicitud solicitud = new Solicitud(
                 null,
@@ -60,13 +73,13 @@ public class SolicitudService {
         Solicitud solicitud = solicitudRepository.buscarPorId(solicitudId);
 
         if (solicitud == null) {
-            throw new RuntimeException("La solicitud no existe.");
+            throw new EntidadNoEncontradaException("La solicitud no existe.");
         }
 
         Responsable responsable = responsableRepository.buscarPorId(responsableId);
 
         if (responsable == null) {
-            throw new RuntimeException("El responsable no existe.");
+            throw new EntidadNoEncontradaException("El responsable no existe.");
         }
 
         solicitud.setResponsable(responsable);
@@ -79,7 +92,7 @@ public class SolicitudService {
         Solicitud solicitud = solicitudRepository.buscarPorId(solicitudId);
 
         if (solicitud == null) {
-            throw new RuntimeException("La solicitud no existe.");
+            throw new EntidadNoEncontradaException("La solicitud no existe.");
         }
 
         validarCambioEstado(solicitud, nuevoEstado);
@@ -102,7 +115,7 @@ public class SolicitudService {
             Estado nuevoEstado) {
 
         if (solicitud.getEstado() == Estado.CANCELADA) {
-            throw new RuntimeException(
+            throw new ReglaNegocioException(
                     "Una solicitud cancelada no puede continuar procesándose."
             );
         }
@@ -110,7 +123,7 @@ public class SolicitudService {
         if (solicitud.getEstado() == Estado.RESUELTA
                 && nuevoEstado == Estado.PENDIENTE) {
 
-            throw new RuntimeException(
+            throw new ReglaNegocioException(
                     "Una solicitud resuelta no puede volver a pendiente."
             );
         }
@@ -118,7 +131,7 @@ public class SolicitudService {
         if (nuevoEstado == Estado.RESUELTA
                 && solicitud.getResponsable() == null) {
 
-            throw new RuntimeException(
+            throw new ReglaNegocioException(
                     "No se puede resolver una solicitud sin responsable."
             );
         }
