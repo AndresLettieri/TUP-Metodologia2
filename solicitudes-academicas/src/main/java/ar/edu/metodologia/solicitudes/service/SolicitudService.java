@@ -4,13 +4,12 @@ import ar.edu.metodologia.solicitudes.exception.EntidadNoEncontradaException;
 import ar.edu.metodologia.solicitudes.exception.ReglaNegocioException;
 import ar.edu.metodologia.solicitudes.model.Estado;
 import ar.edu.metodologia.solicitudes.model.Estudiante;
-import ar.edu.metodologia.solicitudes.model.Prioridad;
 import ar.edu.metodologia.solicitudes.model.Responsable;
 import ar.edu.metodologia.solicitudes.model.Solicitud;
-import ar.edu.metodologia.solicitudes.model.TipoSolicitud;
 import ar.edu.metodologia.solicitudes.repository.EstudianteRepositoryPort;
 import ar.edu.metodologia.solicitudes.repository.ResponsableRepositoryPort;
 import ar.edu.metodologia.solicitudes.repository.SolicitudRepositoryPort;
+import ar.edu.metodologia.solicitudes.model.NuevaSolicitud;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,26 +39,29 @@ public class SolicitudService {
         );
     }
 
-    public Solicitud registrarSolicitud(
-            Long estudianteId,
-            TipoSolicitud tipo,
-            String descripcion,
-            Prioridad prioridad) {
+    public Solicitud registrarSolicitud(NuevaSolicitud nuevaSolicitud) {
 
-        Estudiante estudiante = estudianteRepository.buscarPorId(estudianteId);
+        Objects.requireNonNull(nuevaSolicitud, "nuevaSolicitud no puede ser null");
+
+        Estudiante estudiante = estudianteRepository.buscarPorId(
+                nuevaSolicitud.getEstudianteId()
+        );
 
         if (estudiante == null) {
             throw new EntidadNoEncontradaException("El estudiante no existe.");
         }
 
-        ValidacionesServicio.validarCampoObligatorio(descripcion, "La descripción es obligatoria.");
+        ValidacionesServicio.validarCampoObligatorio(
+                nuevaSolicitud.getDescripcion(),
+                "La descripción es obligatoria."
+        );
 
         Solicitud solicitud = new Solicitud(
                 null,
                 estudiante,
-                tipo,
-                descripcion,
-                prioridad,
+                nuevaSolicitud.getTipo(),
+                nuevaSolicitud.getDescripcion(),
+                nuevaSolicitud.getPrioridad(),
                 Estado.PENDIENTE,
                 null,
                 LocalDateTime.now()
