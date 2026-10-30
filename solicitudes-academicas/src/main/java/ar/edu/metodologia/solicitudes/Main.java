@@ -15,6 +15,7 @@ import ar.edu.metodologia.solicitudes.repository.SolicitudRepository;
 import ar.edu.metodologia.solicitudes.service.EstudianteService;
 import ar.edu.metodologia.solicitudes.service.ResponsableService;
 import ar.edu.metodologia.solicitudes.service.SolicitudService;
+import ar.edu.metodologia.solicitudes.model.NuevaSolicitud;
 
 import java.util.List;
 
@@ -200,12 +201,14 @@ public class Main {
 
         Prioridad prioridad = consola.seleccionarPrioridad();
 
-        Solicitud solicitud = solicitudService.registrarSolicitud(
+        NuevaSolicitud nuevaSolicitud = new NuevaSolicitud(
                 estudianteId,
                 tipo,
                 descripcion,
                 prioridad
         );
+
+        Solicitud solicitud = solicitudService.registrarSolicitud(nuevaSolicitud);
 
         System.out.println(
                 "Solicitud registrada correctamente. ID: "
